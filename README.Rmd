@@ -1,0 +1,70 @@
+---
+title: "Tuning Parameter Selection"
+header-includes:
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require(ggplot2)
+```
+
+## Two important elements 
+
+1. Size of $\lambda_{min} = \lambda_{max} \cdot \varepsilon$
+2. Size of threshold ($\gamma$) where
+\[k = \sup\left\{k \mid dr_k > \gamma \cdot \max_{q} dr_q,\  k \in K \right\}\]
+
+## Found Possible issues
+
+1. I have used $\varepsilon=0.05$, but it tends to estimate too many edges.
+2. I also have used $\gamma=0.3$, and it still provides a lot of edges, consequently, bad evaluation results.
+
+
+## Check up many possible cases 
+
+1. Simulation setting
+ - Graph type: Bipartite, Random DAG, Small-World, Scale-Free, Tree
+ - 10 edges (6 continuous + 4 multinomial nodes)
+ - 3 of continuous nodes are discretized as categorical variables. 
+ - "mc" used the origianl data (sort of 'Oracle case'), "mm" used the discretized data.
+ - 100 iterations
+ - $\varepsilon=(0.05, 0.1, 0.2, 0.3, 0.4, 0.5)$
+ - $\gamma=(0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 1)$
+
+2. SHD cases
+
+```{r, echo=FALSE}
+global_table = readRDS("global_table.rds")
+global_modified <- global_table[global_table$method != "mo", ] 
+p <- ggplot(global_modified, 
+            aes(x = thre, y = SHD,  group = method, color = method))
+p + geom_point() + geom_line() +  
+  facet_grid(vars(graph), vars(lam_eps))
+```
+
+3. JI cases
+
+```{r, echo=FALSE}
+p <- ggplot(global_modified, 
+            aes(x = thre, y = JI,  group = method, color = method))
+p + geom_point() + geom_line() +  
+  facet_grid(vars(graph), vars(lam_eps))
+```
+
+4. FDP cases
+
+```{r, echo=FALSE}
+p <- ggplot(global_modified, 
+            aes(x = thre, y = FDP,  group = method, color = method))
+p + geom_point() + geom_line() +  
+  facet_grid(vars(graph), vars(lam_eps))
+```
+
+## What's next?
+1. When $\gamma$ or $\varepsilon$ gets larger, SHD tends to decrease, but JI (Large is better) also decreases, too. JI seems to have its peak among the all the value of thresholds ($\gamma$).  
+2. Need to find out the possible optimal point. 
+
+
+
+
